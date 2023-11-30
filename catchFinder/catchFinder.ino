@@ -41,14 +41,17 @@ int velocidadDoblar = 180;
 int espera = 10;  //Milisegundos
 
 void motoresAdelante(bool dev = true) {
-  digitalWrite(M1, HIGH);
-  digitalWrite(M2, HIGH);
-  analogWrite(E1, velocidad);
-  analogWrite(E2, velocidad);
-  //Serial.println("Motores hacia adelante");
-  delay(espera);
+
+  for(int i = 0; i < 15; i++){
+      digitalWrite(M1, HIGH);
+    digitalWrite(M2, HIGH);
+    analogWrite(E1, velocidad);
+    analogWrite(E2, velocidad);
+    delay(espera);
+  }
+    delay(10);
+    
     if(dev){
-     Serial.print("sigo");
     lista[movimientos] = 1;
     movimientos+=1;
     }  
@@ -59,7 +62,6 @@ void motoresDetener(bool dev = true) {
   digitalWrite(M2, HIGH);
   analogWrite(E1, 0);
   analogWrite(E2, 0);
-  //Serial.println("Motores hacia adelante");
   delay(espera);
   if(dev){
       lista[movimientos] = 2;
@@ -72,7 +74,6 @@ void motoresAtras(bool dev = true) {
   digitalWrite(M2, LOW);
   analogWrite(E1, velocidadAtras);
   analogWrite(E2, velocidadAtras);
-  //Serial.println("Motores hacia atras");
   delay(espera);
   if(dev){
       lista[movimientos] = 3;
@@ -85,7 +86,6 @@ void motoresDerecha(bool dev = true) {
   digitalWrite(M2, LOW);
   analogWrite(E1, velocidadDoblar);
   analogWrite(E2, velocidadDoblar);
-  Serial.println("Motores Girando hacia la derecha");
   delay(espera);
 if(dev){
     lista[movimientos] = 4;
@@ -97,7 +97,6 @@ void motoresIzquierda(bool dev = true) {
   digitalWrite(M2, HIGH);
   analogWrite(E1, velocidadDoblar);
   analogWrite(E2, velocidadDoblar);
-  Serial.println("Motores Girando hacia la izquierda");
   delay(espera);
   if(dev){
       lista[movimientos] = 5;
@@ -231,7 +230,44 @@ void loop() {
 
   */
 
-  Serial.print("distancia cercania: " );Serial.println(distancia_cercania());
-  Serial.print("distancia_radar: ");Serial.println(distancia_radar());
+
+  if(!encontrado){ //modo de encontrar 
+   if(distancia_cercania() > 7){
+      for(int i = 0; i < 3; i++){
+        motoresAdelante();
+  
+      }
+      motoresDetener(false);
+      delay(300);
+      for(int i = 0;i <90;i+=10){
+        servoMotor2.write(i);
+        delay(150);
+
+    if(distancia_radar < 10){
+      for(int i = 0; i < 6; i++){
+        motoresIzquierda();
+        
+      }
+    }
+        
+      }for(int i = 90;i >=0;i-=10){
+        servoMotor2.write(i);
+        delay(150);
+            if(distancia_radar < 10){
+           for(int i = 0; i < 6; i++){
+        motoresDerecha();
+        
+      }
+    }
+      }
+   }else{
+    
+      cerrar();
+      motoresDetener();
+   }
+
+  }else{
+    devolucion();
+  }
   delay(15);
-}
+  }
