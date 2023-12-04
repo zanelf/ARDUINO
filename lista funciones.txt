@@ -1,0 +1,37 @@
+lista de funciones y que numero le corresponde si le corresponde alguno
+
+motoresAdelante		(1)
+motoresDetener		(2)
+motoresAtras		(3)
+motoresDerecha 		(4)
+motoresIzquierda 	(5)
+
+devolucion
+distancia_radar
+distancia_cercania
+
+-----------------
+variables
+
+
+RGB_sensor
+lista
+Servo servoMotor1 //izquierda
+Servo servoMotor2 //derecha
+
+
+
+-----
+TEMPS
+
+// cuando encuentre algo con el radar se va a desplazar hacia la derecha si no avanza
+if(distancia_radar() < 10){
+				motoresDerecha();
+			}else{
+				for(int i = 0; i < 3; i++){
+					motoresAdelante();
+			
+				}
+				motoresDetener(false);
+				delay(300);
+			}

@@ -5,9 +5,9 @@
 
 SFE_ISL29125 RGB_sensor;
 
-int lista[1500];
-int movimientos=0;
-bool encontrado = false;
+int lista[1500]; //pila para poder devolverse 
+int movimientos=0; //cantidad de movimientos que realiza 
+bool encontrado = false; //verificador si encontro algo 
 
 //Motores Izquierda
 int E1 = 4;
@@ -33,241 +33,226 @@ Servo servoMotor2;
 
 
 // Velocidad de motores
-int velocidad = 170;//255 max   , (160,80,200)
+int velocidad = 170;   //255 max , (160,80,200)
 int velocidadAtras = 110; // 150,
 int velocidadDoblar = 180;
 
 //Delay
 int espera = 10;  //Milisegundos
 
-void motoresAdelante(bool dev = true) {
+void motoresAdelante(bool dev = true) { //si la Variable es verdadera guardara el realizar el movimiento
 
-  for(int i = 0; i < 15; i++){
-      digitalWrite(M1, HIGH);
-    digitalWrite(M2, HIGH);
-    analogWrite(E1, velocidad);
-    analogWrite(E2, velocidad);
-    delay(espera);
-  }
-    delay(10);
-    
-    if(dev){
-    lista[movimientos] = 1;
-    movimientos+=1;
+	for(int i = 0; i < 15; i++){    //esta modificacion esta hecha para ajustar cuanto se mueve el robot    
+		digitalWrite(M1, HIGH);
+		digitalWrite(M2, HIGH);
+		analogWrite(E1, velocidad);
+		analogWrite(E2, velocidad);
+		delay(espera);
+	}
+	delay(10);
+	if(dev){ 
+		lista[movimientos] = 1;
+		movimientos+=1;
     }  
 }
 
+
+//con los otros movimientos queda revisar si en los otros casos deberia aplicarse la misma logica 
 void motoresDetener(bool dev = true) {
-  digitalWrite(M1, HIGH);
-  digitalWrite(M2, HIGH);
-  analogWrite(E1, 0);
-  analogWrite(E2, 0);
-  delay(espera);
-  if(dev){
-      lista[movimientos] = 2;
-  movimientos+=1;
-  }
+	digitalWrite(M1, HIGH);
+	digitalWrite(M2, HIGH);
+	analogWrite(E1, 0);
+	analogWrite(E2, 0);
+	delay(espera);
+	if(dev){
+		lista[movimientos] = 2;
+		movimientos+=1;
+	}
 }
 
 void motoresAtras(bool dev = true) {
-  digitalWrite(M1, LOW);
-  digitalWrite(M2, LOW);
-  analogWrite(E1, velocidadAtras);
-  analogWrite(E2, velocidadAtras);
-  delay(espera);
-  if(dev){
-      lista[movimientos] = 3;
-  movimientos+=1;
-
-  }
+	digitalWrite(M1, LOW);
+	digitalWrite(M2, LOW);
+	analogWrite(E1, velocidadAtras);
+	analogWrite(E2, velocidadAtras);
+	delay(espera);
+	if(dev){
+		lista[movimientos] = 3;
+		movimientos+=1;
+	}
 }
 void motoresDerecha(bool dev = true) {
-  digitalWrite(M1, HIGH);
-  digitalWrite(M2, LOW);
-  analogWrite(E1, velocidadDoblar);
-  analogWrite(E2, velocidadDoblar);
-  delay(espera);
-if(dev){
-    lista[movimientos] = 4;
-  movimientos+=1;
-}
+	digitalWrite(M1, HIGH);
+	digitalWrite(M2, LOW);
+	analogWrite(E1, velocidadDoblar);
+	analogWrite(E2, velocidadDoblar);
+	delay(espera);
+	if(dev){
+		lista[movimientos] = 4;
+		movimientos+=1;
+	}
 }
 void motoresIzquierda(bool dev = true) {
-  digitalWrite(M1, LOW);
-  digitalWrite(M2, HIGH);
-  analogWrite(E1, velocidadDoblar);
-  analogWrite(E2, velocidadDoblar);
-  delay(espera);
-  if(dev){
-      lista[movimientos] = 5;
-  movimientos+=1;
-
-  }
+	digitalWrite(M1, LOW);
+	digitalWrite(M2, HIGH);
+	analogWrite(E1, velocidadDoblar);
+	analogWrite(E2, velocidadDoblar);
+	delay(espera);
+	if(dev){
+		lista[movimientos] = 5;
+		movimientos+=1;
+	}
 }
+
+//cerrar y abrir aplican especificamente a los brazos para agarrar
 void cerrar() {
-  servoMotor1.write(0);
-  servoMotor2.write(80);
-  delay(1000);
+	servoMotor1.write(0);
+	servoMotor2.write(80);
+	delay(1000);
 }
 void abrir() {
-  servoMotor1.write(80);
-  servoMotor2.write(0);
-  delay(1000);
-}
-void ajuste() {
-  digitalWrite(M1, LOW);
-  digitalWrite(M2, LOW);
-  analogWrite(E1, velocidadAtras);
-  analogWrite(E2, velocidadAtras);
-  delay(100);
-  for (int i = 0; i < 5; i++) {
-    motoresDerecha();
-    delay(espera);
-  }
+	servoMotor1.write(80);
+	servoMotor2.write(0);
+	delay(1000);
 }
 
+//es la modificacion anterior del giro ajustada para el buscador de linea 
+void ajuste() { 
+	digitalWrite(M1, LOW);
+	digitalWrite(M2, LOW);
+	analogWrite(E1, velocidadAtras);
+	analogWrite(E2, velocidadAtras);
+	delay(100);
+	for (int i = 0; i < 5; i++) {
+		motoresDerecha();
+		delay(espera);
+	}
+}
+
+
+//esta funcion empieza a correr todo el arreglo lista, lo que hace que replique sus movimientos en reversa
+//por el cambio en como se configuro el buscador, esto probablemente deba cambiarse 
 void devolucion(){
-  for(movimientos = movimientos - 1; movimientos >= 0;movimientos--){
-    switch(lista[movimientos]){
-      case 1:
-        motoresAtras(false);
-      break;
-      case 2:
-      
-      break;
-      case 3:
-        motoresAdelante(false);
-      break;
-      case 4:
-      motoresIzquierda(false);
-      break;
-      case 5:
-      motoresDerecha(false);
-      break;
-    }
-  }
-  encontrado = !encontrado;
+	for(movimientos = movimientos - 1; movimientos >= 0;movimientos--){
+		switch(lista[movimientos]){ //switch que revisa que movimiento realizara ahora 
+		case 1:
+			motoresAtras(false);
+		break;
+		case 2:
+			motoresAdelante(false);
+		break;
+		case 3:
+			motoresAdelante(false);
+		break;
+		case 4:
+		motoresIzquierda(false);
+		break;
+		case 5:
+		motoresDerecha(false);
+		break;
+		}
+	}
+	encontrado = !encontrado;
 }
 
-
+//distancia de los ecolocalizadores
 float distancia_cercania() {
-  float tiempo, distancia;
-  float esperaa = 4; //Espera en microsegundos, puede elegir cualqueir valor que desee
-  float esperaUS = 10; //El sensor necesita como minimo 10us en alto*/
+	float tiempo, distancia;
+	float esperaa = 4; //Espera en microsegundos, puede elegir cualqueir valor que desee
+	float esperaUS = 10; //El sensor necesita como minimo 10us en alto*/
 
-  digitalWrite(pinTrig_cercania, LOW);
-  delayMicroseconds(esperaa);
-  digitalWrite(pinTrig_cercania, HIGH);
-  delayMicroseconds(esperaUS);
-  digitalWrite(pinTrig_cercania, LOW);
-  tiempo = pulseIn(pinEcho_cercania, HIGH);
-  tiempo = tiempo / 2; //se divide el tiempo total (ida+regreso) por la mitad
-  distancia = tiempo / 29.2;
-  return distancia;
+	digitalWrite(pinTrig_cercania, LOW);
+	delayMicroseconds(esperaa);
+	digitalWrite(pinTrig_cercania, HIGH);
+	delayMicroseconds(esperaUS);
+	digitalWrite(pinTrig_cercania, LOW);
+	tiempo = pulseIn(pinEcho_cercania, HIGH);
+	tiempo = tiempo / 2; //se divide el tiempo total (ida+regreso) por la mitad
+	distancia = tiempo / 29.2;
+	return distancia;
 }
 
 float distancia_radar() {
-  float tiempo, distancia;
-  float esperaa = 4; //Espera en microsegundos, puede elegir cualqueir valor que desee
-  float esperaUS = 10; //El sensor necesita como minimo 10us en alto*/
+	float tiempo, distancia;
+	float esperaa = 4; //Espera en microsegundos, puede elegir cualqueir valor que desee
+	float esperaUS = 10; //El sensor necesita como minimo 10us en alto*/
 
-  digitalWrite(pinTrig_radar, LOW);
-  delayMicroseconds(esperaa);
-  digitalWrite(pinTrig_radar, HIGH);
-  delayMicroseconds(esperaUS);
-  digitalWrite(pinTrig_radar, LOW);
-  tiempo = pulseIn(pinEcho_radar, HIGH);
-  tiempo = tiempo / 2; //se divide el tiempo total (ida+regreso) por la mitad
-  distancia = tiempo / 29.2;
-  return distancia;
+	digitalWrite(pinTrig_radar, LOW);
+	delayMicroseconds(esperaa);
+	digitalWrite(pinTrig_radar, HIGH);
+	delayMicroseconds(esperaUS);
+	digitalWrite(pinTrig_radar, LOW);
+	tiempo = pulseIn(pinEcho_radar, HIGH);
+	tiempo = tiempo / 2; //se divide el tiempo total (ida+regreso) por la mitad
+	distancia = tiempo / 29.2;
+	return distancia;
 } 
 
-void setup()
-{
-  pinMode(pinTrig_cercania, OUTPUT);
-  pinMode(pinEcho_cercania, INPUT);
-  pinMode(pinTrig_radar, OUTPUT);
-  pinMode(pinEcho_radar, INPUT);
+void setup(){
+	pinMode(pinTrig_cercania, OUTPUT);
+	pinMode(pinEcho_cercania, INPUT);
+	pinMode(pinTrig_radar, OUTPUT);
+	pinMode(pinEcho_radar, INPUT);
 
-  pinMode(IR, INPUT);
+	pinMode(IR, INPUT);
 
-  servoMotor1.attach(9);
-  servoMotor2.attach(10);
-  Serial.begin(115200);  // Monitor serial
+	servoMotor1.attach(9);
+	servoMotor2.attach(10);
+	Serial.begin(115200);  // Monitor serial
+
+	//esta seccion esta planeada como un iniciador para cosas que deben hacerse al empezar una sola vez
+	if (RGB_sensor.init()){
+		Serial.println("Sensor Initialization Successful\n\r");
+		delay(5000);
+		for(int i = 0; i < 3;i++){
+			motoresIzquierda(false);
+		}
 
 
-  if (RGB_sensor.init())
-  {
-    Serial.println("Sensor Initialization Successful\n\r");
-    abrir();
-  }
+	}
 
 }
 
 void loop() {
+	unsigned int red = RGB_sensor.readRed();
+	unsigned int green = RGB_sensor.readGreen();
+	unsigned int blue = RGB_sensor.readBlue();
+	int negro = 450;
+	int suma = red + green + blue;
 
-  unsigned int red = RGB_sensor.readRed();
-  unsigned int green = RGB_sensor.readGreen();
-  unsigned int blue = RGB_sensor.readBlue();
+	/*  esta seccion lo que hace es reconocer el borde en base al color queda verificar 
+		if(distancia_cercania() < 17){
+			servoMotor1.write(60);
+			Serial.print("color:");Serial.println(suma);
+			
+			if(suma < 800){
+				servoMotor2.write(70);delay(15);servoMotor2.write(0);delay(15);servoMotor2.write(70);delay(15);servoMotor2.write(0);delay(15);
+			}else{
 
+			}
+		}else{
+		abrir();
+		motoresAdelante();
+		}
 
-  int negro = 450;
-  int suma = red + green + blue;
-
-  /*
-    if(distancia() < 17){
-        servoMotor1.write(60);
-        Serial.print("color:");Serial.println(suma);
-        if(suma < 800){
-          servoMotor2.write(70);delay(15);servoMotor2.write(0);delay(15);servoMotor2.write(70);delay(15);servoMotor2.write(0);delay(15);
-        }else{
-
-        }
-    }else{
-      abrir();
-      motoresAdelante();
-    }
-
-  */
+	*/
 
 
-  if(!encontrado){ //modo de encontrar 
-   if(distancia_cercania() > 7){
-      for(int i = 0; i < 3; i++){
-        motoresAdelante();
-  
-      }
-      motoresDetener(false);
-      delay(300);
-      for(int i = 0;i <90;i+=10){
-        servoMotor2.write(i);
-        delay(150);
+	servoMotor2.write(20); //temporal
 
-    if(distancia_radar < 10){
-      for(int i = 0; i < 6; i++){
-        motoresIzquierda();
-        
-      }
-    }
-        
-      }for(int i = 90;i >=0;i-=10){
-        servoMotor2.write(i);
-        delay(150);
-            if(distancia_radar < 10){
-           for(int i = 0; i < 6; i++){
-        motoresDerecha();
-        
-      }
-    }
-      }
-   }else{
-    
-      cerrar();
-      motoresDetener();
-   }
 
-  }else{
-    devolucion();
-  }
-  delay(15);
+	if(!encontrado){ //modo de encontrar 
+		//verificando que el sistema funcione bien, con una version simplificada de lo que hace, todo lo que tiene es el comportamiento basico
+		if(distancia_cercania() > 4){ // alcance para agarrar
+			//siguiente if es de color
+			
+		}else{
+			cerrar();
+			motoresDetener();
+			encontrado = !encontrado;
+		}
+	}else{
+		devolucion();
+	}
+	delay(15);
   }
