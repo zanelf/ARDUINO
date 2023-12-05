@@ -20,6 +20,12 @@ int M2 = 24;
 //infrarojo
 int IR = 40;
 
+//led RGB
+int ledRojo = 2;
+int ledVerde = 12;
+int ledAzul = 13;
+
+
 //Variables sensor Ultrasonico
 int pinEcho_cercania = 52;
 int pinTrig_cercania = 53;
@@ -188,6 +194,12 @@ float distancia_radar() {
 	return distancia;
 } 
 
+void led(int uno,int dos,int tres){
+  digitalWrite(ledRojo,uno);
+  digitalWrite(ledVerde,dos);
+  digitalWrite(ledAzul,tres);
+}
+
 void setup(){
 	pinMode(pinTrig_cercania, OUTPUT);
 	pinMode(pinEcho_cercania, INPUT);
@@ -196,20 +208,14 @@ void setup(){
 
 	pinMode(IR, INPUT);
 
+	pinMode(ledRojo,OUTPUT);
+	pinMode(ledVerde,OUTPUT);
+	pinMode(ledAzul,OUTPUT);
+
 	servoMotor1.attach(9);
 	servoMotor2.attach(10);
 	Serial.begin(115200);  // Monitor serial
-
-	//esta seccion esta planeada como un iniciador para cosas que deben hacerse al empezar una sola vez
-	if (RGB_sensor.init()){
-		Serial.println("Sensor Initialization Successful\n\r");
-		delay(5000);
-		for(int i = 0; i < 3;i++){
-			motoresIzquierda(false);
-		}
-
-
-	}
+	
 
 }
 
@@ -242,17 +248,19 @@ void loop() {
 
 
 	if(!encontrado){ //modo de encontrar 
-		//verificando que el sistema funcione bien, con una version simplificada de lo que hace, todo lo que tiene es el comportamiento basico
+		//verificando que el sistema funcione bien, con una version simplificada de lo que hace, todo lo que tiene es el comportamiento
 		if(distancia_cercania() > 4){ // alcance para agarrar
 			//siguiente if es de color
 			
 		}else{
 			cerrar();
+			led(HIGH,HIGH,HIGH);
 			motoresDetener();
 			encontrado = !encontrado;
 		}
 	}else{
 		devolucion();
+    motoresDetener();
 	}
 	delay(15);
   }

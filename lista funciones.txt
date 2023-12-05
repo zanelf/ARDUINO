@@ -1,15 +1,15 @@
 lista de funciones y que numero le corresponde si le corresponde alguno
 
-motoresAdelante		(1)
-motoresDetener		(2)
-motoresAtras		(3)
-motoresDerecha 		(4)
-motoresIzquierda 	(5)
+motoresAdelante();	(1)
+motoresDetener();	(2)
+motoresAtras();		(3)
+motoresDerecha();	(4)
+motoresIzquierda();	(5)
 
 devolucion
 distancia_radar
 distancia_cercania
-
+led
 -----------------
 variables
 
@@ -35,3 +35,7 @@ if(distancia_radar() < 10){
 				motoresDetener(false);
 				delay(300);
 			}
+
+
+-----------
+servo motor dimensiones  	22mm x 12mm x 19mm
