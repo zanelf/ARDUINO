@@ -1,0 +1,97 @@
+#include <Servo.h>
+#include <Wire.h>
+#include "SparkFunISL29125.h"
+
+SFE_ISL29125 RGB_sensor;
+
+int lista[1500]; // pila para poder devolverse
+int movimientos = 0; // cantidad de movimientos que realiza
+bool encontrado = false; // verificador si encontro algo
+
+// Motores Izquierda
+int E1 = 4;
+int M1 = 26;
+
+// Motores Derecha
+int E2 = 3;
+int M2 = 24;
+
+// Infrarrojo
+int IR = 40;
+
+// Led RGB
+int ledRojo = 2;
+int ledVerde = 12;
+int ledAzul = 13;
+
+// Variables sensor Ultrasonico
+int pinEcho_cercania = 52;
+int pinTrig_cercania = 53;
+
+int pinEcho_radar = 50;
+int pinTrig_radar = 51;
+
+// Variable SERVO
+Servo servoMotor1;
+Servo servoMotor2;
+Servo ServoRadar;
+
+// Velocidad de motores
+int velocidad = 170;   // 255 max , (160,80,200)
+int velocidadAtras = 110; // 150,
+int velocidadDoblar = 180;
+
+// Delay
+int espera = 10; // Milisegundos
+
+long duration;
+int distance;
+
+void led(int uno, int dos, int tres)
+{
+  digitalWrite(ledRojo, uno);
+  digitalWrite(ledVerde, dos);
+  digitalWrite(ledAzul, tres);
+}
+
+void motoresDetener(bool dev = true)
+{
+  digitalWrite(M1, HIGH);
+  digitalWrite(M2, HIGH);
+  analogWrite(E1, 0);
+  analogWrite(E2, 0);
+  delay(espera);
+  if (dev)
+  {
+    lista[movimientos] = 2;
+    movimientos += 1;
+  }
+}
+
+void motoresAdelante(bool dev = true)
+{ // si la Variable es verdadera guardara el realizar el movimiento
+  for (int i = 0; i < 40; i++)
+  { // esta modificación está hecha para ajustar cuánto se mueve el robot
+    digitalWrite(M1, HIGH);
+    digitalWrite(M2, HIGH);
+    analogWrite(E1, velocidad);
+    analogWrite(E2, velocidad);
+    delay(espera);
+  }
+  delay(10);
+  if (dev)
+  {
+    lista[movimientos] = 1;
+    movimientos += 1;
+  }
+  motoresDetener();
+}
+
+// con los otros movimientos queda revisar si en los otros casos debería aplicarse la misma lógica
+
+void motoresAtras(bool dev = true)
+{
+  for (int i = 0; i < 40; i++)
+  {
+    digitalWrite(M1, LOW);
+    digitalWrite

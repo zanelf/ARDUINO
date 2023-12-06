@@ -1,3 +1,4 @@
+//Librerias
 #include <Servo.h>
 #include <Wire.h>
 #include "SparkFunISL29125.h"
@@ -25,6 +26,7 @@ int ledRojo = 2;
 int ledVerde = 12;
 int ledAzul = 13;
 
+int repeticiones=0;
 
 //Variables sensor Ultrasonico
 int pinEcho_cercania = 52;
@@ -51,13 +53,13 @@ long duration;
 int distance;
 
 
-
-
+// led para saber el estado de movimiento
 void led(int uno,int dos,int tres){
-  digitalWrite(ledRojo,uno);
-  digitalWrite(ledVerde,dos);
-  digitalWrite(ledAzul,tres);
+  digitalWrite(ledRojo,uno);  //derecha
+  digitalWrite(ledVerde,dos); //adelante
+  digitalWrite(ledAzul,tres); //izquierda
 }
+
 
 void motoresDetener(bool dev = true) {
 	digitalWrite(M1, HIGH);
@@ -66,7 +68,7 @@ void motoresDetener(bool dev = true) {
 	analogWrite(E2, 0);
 	delay(espera);
 	if(dev){
-		lista[movimientos] = 2;
+		lista[movimientos] = 2;  //guarda movimiento realizado
 		movimientos+=1;
 	}
 }
@@ -74,7 +76,7 @@ void motoresDetener(bool dev = true) {
 
 void motoresAdelante(bool dev = true) { //si la Variable es verdadera guardara el realizar el movimiento
 
-	for(int i = 0; i < 15; i++){    //esta modificacion esta hecha para ajustar cuanto se mueve el robot    
+	for(int i = 0; i < 35; i++){    //esta modificacion esta hecha para ajustar cuanto se mueve el robot    
 		digitalWrite(M1, HIGH);
 		digitalWrite(M2, HIGH);
 		analogWrite(E1, velocidad);
@@ -85,6 +87,7 @@ void motoresAdelante(bool dev = true) { //si la Variable es verdadera guardara e
 	if(dev){ 
 		lista[movimientos] = 1;
 		movimientos+=1;
+		Serial.println("ADELANTE");
     }  
 	motoresDetener();	
 }
@@ -94,36 +97,49 @@ void motoresAdelante(bool dev = true) { //si la Variable es verdadera guardara e
 
 
 void motoresAtras(bool dev = true) {
-	digitalWrite(M1, LOW);
-	digitalWrite(M2, LOW);
-	analogWrite(E1, velocidadAtras);
-	analogWrite(E2, velocidadAtras);
-	delay(espera);
+	for(int i = 0; i < 35; i++){
+		digitalWrite(M1, LOW);
+		digitalWrite(M2, LOW);
+		analogWrite(E1, velocidadAtras);
+		analogWrite(E2, velocidadAtras);
+		delay(espera);
+	}
+	delay(10);
+
 	if(dev){
 		lista[movimientos] = 3;
 		movimientos+=1;
+		Serial.println("ATRAS");
 	}
 }
 void motoresDerecha(bool dev = true) {
-	digitalWrite(M1, HIGH);
-	digitalWrite(M2, LOW);
-	analogWrite(E1, velocidadDoblar);
-	analogWrite(E2, velocidadDoblar);
-	delay(espera);
+	for(int i = 0; i < 30; i++){
+		digitalWrite(M1, HIGH);
+		digitalWrite(M2, LOW);
+		analogWrite(E1, velocidadDoblar);
+		analogWrite(E2, velocidadDoblar);
+		delay(espera);
+	}
+	delay(10);
 	if(dev){
 		lista[movimientos] = 4;
 		movimientos+=1;
+		Serial.println("DERECHA");
 	}
 }
 void motoresIzquierda(bool dev = true) {
-	digitalWrite(M1, LOW);
-	digitalWrite(M2, HIGH);
-	analogWrite(E1, velocidadDoblar);
-	analogWrite(E2, velocidadDoblar);
-	delay(espera);
+	for(int i = 0; i < 30; i++){
+		digitalWrite(M1, LOW);
+		digitalWrite(M2, HIGH);
+		analogWrite(E1, velocidadDoblar);
+		analogWrite(E2, velocidadDoblar);
+		delay(espera);
+	}
+	delay(10);
 	if(dev){
 		lista[movimientos] = 5;
 		movimientos+=1;
+		Serial.println("IZQUIERDA");
 	}
 }
 
@@ -133,20 +149,27 @@ void devolucion(){
 		switch(lista[movimientos]){ //switch que revisa que movimiento realizara ahora 
 		case 1:
 			motoresAtras(false);
+			Serial.println("1: atras");
 		break;
 		case 2:
-			motoresAdelante(false);
+			motoresDetener(false);
+			Serial.println("2: detener");
 		break;
 		case 3:
 			motoresAdelante(false);
+			Serial.println("3: adelante");
 		break;
 		case 4:
 		motoresIzquierda(false);
+		Serial.println("4: Izquierda");
 		break;
 		case 5:
 		motoresDerecha(false);
+		Serial.println("5: Izquierda");
 		break;
 		}
+		delay(30);
+		motoresDetener(false);
 	}
 	encontrado = !encontrado;
 }
@@ -160,8 +183,8 @@ void cerrar() {
 	delay(1000);
 }
 void abrir() {
-	servoMotor1.write(170);
-	servoMotor2.write(0);
+	servoMotor1.write(180);
+	servoMotor2.write(-10);
 	delay(1000);
 }
 
@@ -193,54 +216,131 @@ void setup(){
 
 }
 
+float distancia_cercania() {
+	float tiempo, distancia;
+	float esperaa = 4; //Espera en microsegundos, puede elegir cualqueir valor que desee
+	float esperaUS = 10; //El sensor necesita como minimo 10us en alto*/
+
+	digitalWrite(pinTrig_cercania, LOW);
+	delayMicroseconds(esperaa);
+	digitalWrite(pinTrig_cercania, HIGH);
+	delayMicroseconds(esperaUS);
+	digitalWrite(pinTrig_cercania, LOW);
+	tiempo = pulseIn(pinEcho_cercania, HIGH);
+	tiempo = tiempo / 2; //se divide el tiempo total (ida+regreso) por la mitad
+	distancia = tiempo / 29.2;
+	return distancia;
+}
+
 void loop() {
 
 	int distancias[400];
 	int grados[400];
 	int	cant =0;
+	 motoresDetener(false);
+
 	
+
+
+	if(!encontrado){ //modo de encontrar 
+		//verificando que el sistema funcione bien, con una version simplificada de lo que hace, todo lo que tiene es el comportamiento
+		if(distancia_cercania() < 6){ // alcance para agarrar
+			motoresDetener(false);
+			cerrar();
+      
+			encontrado = !encontrado;
+			
+		}else if(distancia_cercania() < 35){
+
+			motoresAdelante();
+			delay(500);
+			motoresDetener(false);
+			// servoMotor1.write(120);
+			// delay(1000);
+
+			unsigned int red = RGB_sensor.readRed();
+			unsigned int green = RGB_sensor.readGreen();
+			unsigned int blue = RGB_sensor.readBlue();
+			int negro = 450;
+			int suma = red + green + blue;
+      Serial.print("R: ");Serial.print(red);Serial.print(" G: ");Serial.print(green);Serial.print(" B: ");Serial.println(blue);
+			Serial.print("color:");Serial.println(suma);
+			
+		/*
+			if(suma < 800){ //AJUSTE IN SITU 
+				motoresIzquierda();motoresIzquierda();motoresIzquierda();motoresIzquierda();
+				servoMotor1.write(170);
+			}else{
+				//abrir();
+				
+			}
+		*/
+
+		}else{
+			
+
 	//escanea el radar buscando objetos cercanos
-	for(int i=15;i<=165;i++){  
+  if(repeticiones<10){
+	for(int i=70;i<=115;i++){  
 		ServoRadar.write(i);
-		delay(50);
+		delay(30);
 		distance = distancia_radar();
-		//Serial.print(i);Serial.print(",");Serial.print(distance);Serial.println(".");
+	
 
 		//si cumple el parametro solicitado agregara la distancia y los grados		
-		if(distance < 30 && distance > 20){
+		if(distance < 30 && distance > 10){
+			Serial.print(i);Serial.print(",");Serial.print(distance);Serial.println(".");
 			distancias[cant] =  distance;
 			grados[cant] = i;
 			cant += 1;
 		}
-
-	}
-
-	
-	int dir = 0;
-	for(int i = 1; i < cant;i++){
-		if(distancias[dir] > distancias[i]){
-			dir = i;
-		}
-	}
+    }
+	repeticiones=repeticiones+1;
+  }
 
 	if(cant == 0){
 		motoresAdelante();
+    led(HIGH,LOW,HIGH);
 	}else{
-
+    led(LOW,HIGH,LOW);
+		int dir = 0;
+		for(int i = 1; i < cant;i++){
+			if(distancias[dir] > distancias[i]){
+				dir = i;
+			}
+		}
+    
+		if(grados[dir] >= 125 ){
+      led(HIGH,HIGH,LOW);
+			motoresIzquierda();
+			motoresIzquierda();
+		}else if(grados[dir] >= 83){
+      led(HIGH,HIGH,LOW);
+			motoresIzquierda();
+		}else if(grados[dir] >= 42){
+      led(LOW,HIGH,HIGH);
+			motoresDerecha();
+		}else{
+      led(LOW,HIGH,HIGH);
+			motoresDerecha();
+			motoresDerecha();
+		}
 	}
 
+		}
+	}else{
+		devolucion();
+    	motoresDetener(false);
+		delay(500);
+		if(digitalRead(IR) == HIGH){
+			abrir();
+			delay(500);
+		}
 
-
-	//[DEBUG]
-	for(int i = 0;i < cant;i++){
-		Serial.print("distancai[ ");Serial.print(i);Serial.print(" ]: ");Serial.println(distancias[i]);
-	}	
-	for(int i = 0;i < cant;i++){
-		Serial.print("grados[ ");Serial.print(i);Serial.print(" ]: ");Serial.println(grados[i]);
+		
 	}
-	delay(1000);
-	delay(1000);
-
+	 
+	delay(15);
 
 
 }
