@@ -38,4 +38,14 @@ if(distancia_radar() < 10){
 
 
 -----------
-servo motor dimensiones  	22mm x 12mm x 19mm
+void cerrar() {
+	servoMotor1.write(95);
+	servoMotor2.write(50);
+	delay(1000);
+}
+void abrir() {
+	servoMotor1.write(170);
+	servoMotor2.write(0);
+	delay(1000);
+}
+
