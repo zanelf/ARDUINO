@@ -199,13 +199,14 @@ void loop() {
 	int grados[400];
 	int	cant =0;
 	
-
+	//escanea el radar buscando objetos cercanos
 	for(int i=15;i<=165;i++){  
 		ServoRadar.write(i);
 		delay(50);
 		distance = distancia_radar();
 		//Serial.print(i);Serial.print(",");Serial.print(distance);Serial.println(".");
-		
+
+		//si cumple el parametro solicitado agregara la distancia y los grados		
 		if(distance < 30 && distance > 20){
 			distancias[cant] =  distance;
 			grados[cant] = i;
@@ -213,6 +214,8 @@ void loop() {
 		}
 
 	}
+
+	
 	int dir = 0;
 	for(int i = 1; i < cant;i++){
 		if(distancias[dir] > distancias[i]){
@@ -223,7 +226,7 @@ void loop() {
 	if(cant == 0){
 		motoresAdelante();
 	}else{
-		
+
 	}
 
 
